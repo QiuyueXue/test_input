@@ -29,6 +29,8 @@ function gotStream(stream) {
   window.stream = stream; // make stream available to console
 
   rec = new MediaRecorder(stream);
+  visualize(stream);
+  
   rec.ondataavailable = e => {
     audioChunks.push(e.data);
     if (rec.state == "inactive") {
@@ -42,6 +44,95 @@ function gotStream(stream) {
       audioDownload.download = 'mp3';
       audioDownload.innerHTML = 'download';
     }
+  }
+}
+
+function visualize(stream) {
+  if(!audioCtx) {
+    audioCtx = new AudioContext();
+  }
+
+  const source = audioCtx.createMediaStreamSource(stream);
+  const analyser = audioCtx.createAnalyser();
+  let feedForward = [1, 4, 6, 4, 1];
+  let feedBack = [1, -3.89515962872624, 5.69093969755989, -3.69623536934508,0.900457760845518];
+  const iirfilter = audioCtx.createIIRFilter(feedforward=feedForward, feedback=feedBack);
+  var gainNode = audioCtx.createGain();
+  gainNode.gain.value = 1E-05;
+  var max_amplification = 5E-04;
+
+  analyser.fftSize = 2048;
+  let amplitudeBufferLength = analyser.fftSize;
+  let frequencyBufferLength = analyser.frequencyBinCount;
+  let amplitudeData = new Uint8Array(amplitudeBufferLength);
+  let frequencyData = new Uint8Array(frequencyBufferLength);
+
+  
+  amplitudeCanvas.style.width = '100%';
+  amplitudeCanvas.width  = amplitudeCanvas.offsetWidth;
+  const amplitudeCanvasCtx = amplitudeCanvas.getContext('2d');
+  
+  // frequencyCanvas.style.width = '100%';
+  // frequencyCanvas.width  = frequencyCanvas.offsetWidth;
+  // const frequencyCanvasCtx = frequencyCanvas.getContext('2d');
+
+  const GRAPH_WINDOW_LENGTH = 120000;
+  let graphWindowData = new Uint8Array(GRAPH_WINDOW_LENGTH);
+  let graphWindowStart = 0;
+
+  // source.connect(analyser);
+
+  source.connect(iirfilter);
+  iirfilter.connect(gainNode);
+  gainNode.connect(analyser);
+  draw();
+
+  function draw() {
+    requestAnimationFrame(draw);
+
+    analyser.getByteTimeDomainData(amplitudeData);
+    
+    const offset = GRAPH_WINDOW_LENGTH - graphWindowStart;
+    graphWindowData.set(amplitudeData.slice(0, offset), graphWindowStart);
+    graphWindowData.set(amplitudeData.slice(offset), 0);
+    graphWindowStart = (graphWindowStart + amplitudeBufferLength) % GRAPH_WINDOW_LENGTH;
+
+    drawAmplitudeGraph();
+    // drawFrequencyGraph();
+    max_amplitude = Math.max.apply(Math, amplitudeData);
+    document.getElementById('volume').addEventListener('change', function() {
+    max_amplification = this.value;
+});
+    auto_gain = max_amplification/max_amplitude;
+    gainNode.gain.value = auto_gain;
+
+  }
+
+  function drawAmplitudeGraph() {
+    amplitudeCanvasCtx.fillStyle = 'rgb(0, 0, 0)';
+    amplitudeCanvasCtx.fillRect(0, 0, amplitudeCanvas.width, amplitudeCanvas.height);
+
+    amplitudeCanvasCtx.lineWidth = 2;
+    amplitudeCanvasCtx.strokeStyle = 'rgb(0, 255, 0)';
+    amplitudeCanvasCtx.beginPath();
+
+    const sliceWidth = amplitudeCanvas.width * 1.0 / GRAPH_WINDOW_LENGTH;
+    let x = 0;
+    for(let i = 0; i < GRAPH_WINDOW_LENGTH; i++) {
+      const v = graphWindowData[(i + graphWindowStart) % GRAPH_WINDOW_LENGTH] / 128.0;
+      const y = v * amplitudeCanvas.height/2;
+
+      if(i === 0) {
+        amplitudeCanvasCtx.moveTo(x, y);
+      } else {
+        amplitudeCanvasCtx.lineTo(x, y);
+      }
+
+      x += sliceWidth;
+    }
+
+    amplitudeCanvasCtx.lineTo(amplitudeCanvas.width, amplitudeCanvas.height/2);
+    amplitudeCanvasCtx.stroke();
   }
 }
 
@@ -72,7 +163,8 @@ audioInputSelect.onchange = start;
 
 startRecord.onclick = e => {
   startRecord.disabled = true;
-  stopRecord.disabled = false;
+  stopRecord.disab
+  led = false;
   audioChunks = [];
   rec.start();
 }

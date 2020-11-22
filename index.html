@@ -1,18 +1,39 @@
-<body>
-<div>
-		<h2>Audio record and playback</h2>
-    <p>
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>Home Stethoscope</title>
+    <link href="styles/app.css" rel="stylesheet" type="text/css">
+  </head>
+  <body>
+      <div class="container">
+      <header>
+        <h1>Home Stethoscope</h1>
+      </header>
+      <p>
        <label for="audioSource">Audio input source: </label>
        <select id="audioSource"></select>
-    </p>
-		<p>
-			<button id=startRecord>start</button>
-			<button id=stopRecord disabled>stop</button>
-		</p>	
-		<p>
-			<audio id=recordedAudio></audio>
-			<a id=audioDownload></a>
-		</p>
-</div>
-<script src="app.js"></script>
-</body>
+      </p>
+      
+      <section class="main-controls">
+        <canvas class="visualizer" height="300px"></canvas>
+        <div class="col-3">
+          <p>Adjust Amplification</p>
+          <input id="volume" type="range" min="1E-04" max="5E-03" step="1E-04" value="5E-04"/>
+        </div>
+        <div id="buttons">
+          <button class="record">Record</button>
+          <button class="stop">Stop</button>
+        </div>
+      </section>
+      <section class="sound-clips">
+      </section>
+
+    </div>
+
+    <!-- <script src="scripts/processing.js"></script> -->
+    <script src="app.js"></script>
+
+  </body>
+</html>

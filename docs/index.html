@@ -22,6 +22,14 @@
           <p>Adjust Amplification</p>
           <input id="volume" type="range" min="1E-04" max="5E-03" step="1E-04" value="5E-04"/>
         </div>
+        <p>
+			<button id=startRecord>start</button>
+			<button id=stopRecord disabled>stop</button>
+		</p>	
+		<p>
+			<audio id=recordedAudio></audio>
+			<a id=audioDownload></a>
+		</p>
         <div id="buttons">
           <button class="record">Record</button>
           <button class="stop">Stop</button>

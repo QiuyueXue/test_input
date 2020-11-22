@@ -46,7 +46,7 @@ function gotStream(stream) {
   window.stream = stream; // make stream available to console
 
   rec = new MediaRecorder(stream);
-  visualize(stream);
+//   visualize(stream);
   
   rec.ondataavailable = e => {
     audioChunks.push(e.data);

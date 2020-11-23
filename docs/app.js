@@ -1,20 +1,3 @@
-// // set up basic variables for app
-// const record = document.querySelector('.record');
-// const stop = document.querySelector('.stop');
-// const soundClips = document.querySelector('.sound-clips');
-// const amplitudeCanvas = document.querySelector('.visualizer');
-// const mainSection = document.querySelector('.main-controls');
-
-// // disable stop button while not recording
-
-// stop.disabled = true;
-
-// // visualiser setup - create web audio api context and canvas
-
-// let audioCtx;
-// const amplitudeCanvasCtx = amplitudeCanvas.getContext("2d");
-
-
 const audioInputSelect = document.querySelector('select#audioSource');
 const selectors = [audioInputSelect];
 
@@ -44,25 +27,77 @@ function gotDevices(deviceInfos) {
 
 function gotStream(stream) {
   window.stream = stream; // make stream available to console
-
-  rec = new MediaRecorder(stream);
-//   visualize(stream);
   
+  rec = new MediaRecorder(stream);
   rec.ondataavailable = e => {
     audioChunks.push(e.data);
-    if (rec.state == "inactive") {
-      let blob = new Blob(audioChunks, {
-        type: 'audio/x-mpeg-3'
-      });
+    if (rec.state == "inactive"){
+      let blob = new Blob(audioChunks,{type:'audio/x-mpeg-3'});
       recordedAudio.src = URL.createObjectURL(blob);
-      recordedAudio.controls = true;
-      recordedAudio.autoplay = true;
+      recordedAudio.controls=true;
+      recordedAudio.autoplay=true;
       audioDownload.href = recordedAudio.src;
       audioDownload.download = 'mp3';
       audioDownload.innerHTML = 'download';
     }
   }
 }
+
+function handleError(error) {
+  console.log('navigator.MediaDevices.getUserMedia error: ', error.message, error.name);
+}
+
+function start() {
+  // Second call to getUserMedia() with changed device may cause error, so we need to release stream before changing device
+  if (window.stream) {
+    stream.getAudioTracks()[0].stop();
+  }
+
+  const audioSource = audioInputSelect.value;
+  
+  const constraints = {
+    audio: {deviceId: audioSource ? {exact: audioSource} : undefined}
+  };
+  
+  navigator.mediaDevices.getUserMedia(constraints).then(gotStream).catch(handleError);
+}
+
+audioInputSelect.onchange = start;
+  
+startRecord.onclick = e => {
+  startRecord.disabled = true;
+  stopRecord.disabled=false;
+  audioChunks = [];
+  rec.start();
+}
+stopRecord.onclick = e => {
+  startRecord.disabled = false;
+  stopRecord.disabled=true;
+  rec.stop();
+}
+
+navigator.mediaDevices.enumerateDevices()
+.then(gotDevices)
+.then(start)
+.catch(handleError);
+
+
+// // set up basic variables for app
+// const record = document.querySelector('.record');
+// const stop = document.querySelector('.stop');
+// const soundClips = document.querySelector('.sound-clips');
+// const amplitudeCanvas = document.querySelector('.visualizer');
+// const mainSection = document.querySelector('.main-controls');
+
+// // disable stop button while not recording
+
+// stop.disabled = true;
+
+// // visualiser setup - create web audio api context and canvas
+
+// let audioCtx;
+// const amplitudeCanvasCtx = amplitudeCanvas.getContext("2d");
+
 
 // function visualize(stream) {
 //   if(!audioCtx) {
@@ -152,42 +187,3 @@ function gotStream(stream) {
 //     amplitudeCanvasCtx.stroke();
 //   }
 // }
-
-function handleError(error) {
-  console.log('navigator.MediaDevices.getUserMedia error: ', error.message, error.name);
-}
-
-function start() {
-  // Second call to getUserMedia() with changed device may cause error, so we need to release stream before changing device
-  if (window.stream) {
-    stream.getAudioTracks()[0].stop();
-  }
-
-  const audioSource = audioInputSelect.value;
-
-  const constraints = {
-    audio: {deviceId: audioSource ? {exact: audioSource} : undefined}
-  };
-
-  navigator.mediaDevices.getUserMedia(constraints).then(gotStream).catch(handleError);
-}
-
-audioInputSelect.onchange = start;
-
-startRecord.onclick = e => {
-  startRecord.disabled = true;
-  stopRecord.disab
-  led = false;
-  audioChunks = [];
-  rec.start();
-}
-stopRecord.onclick = e => {
-  startRecord.disabled = false;
-  stopRecord.disabled = true;
-  rec.stop();
-}
-
-navigator.mediaDevices.enumerateDevices()
-  .then(gotDevices)
-  .then(start)
-  .catch(handleError);

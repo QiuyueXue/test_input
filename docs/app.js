@@ -40,65 +40,6 @@ function gotDevices(deviceInfos) {
   });
 }
 
-function gotStream(stream) {
-  window.stream = stream; // make stream available to console
-  
-  rec = new MediaRecorder(stream);
-  visualize(stream);
-  rec.ondataavailable = e => {
-    audioChunks.push(e.data);
-    if (rec.state == "inactive"){
-      let blob = new Blob(audioChunks,{type:'audio/x-mpeg-3'});
-      recordedAudio.src = URL.createObjectURL(blob);
-      recordedAudio.controls=true;
-      recordedAudio.autoplay=true;
-      audioDownload.href = recordedAudio.src;
-      audioDownload.download = 'mp3';
-      audioDownload.innerHTML = 'download';
-    }
-  }
-}
-
-function handleError(error) {
-  console.log('navigator.MediaDevices.getUserMedia error: ', error.message, error.name);
-}
-
-function start() {
-  // Second call to getUserMedia() with changed device may cause error, so we need to release stream before changing device
-  if (window.stream) {
-    stream.getAudioTracks()[0].stop();
-  }
-
-  const audioSource = audioInputSelect.value;
-  
-  const constraints = {
-    audio: {deviceId: audioSource ? {exact: audioSource} : undefined}
-  };
-  
-  navigator.mediaDevices.getUserMedia(constraints).then(gotStream).catch(handleError);
-}
-
-audioInputSelect.onchange = start;
-  
-startRecord.onclick = e => {
-  startRecord.disabled = true;
-  stopRecord.disabled=false;
-  audioChunks = [];
-  rec.start();
-}
-stopRecord.onclick = e => {
-  startRecord.disabled = false;
-  stopRecord.disabled=true;
-  rec.stop();
-}
-
-navigator.mediaDevices.enumerateDevices()
-.then(gotDevices)
-.then(start)
-.catch(handleError);
-
-
-
 function visualize(stream) {
   if(!audioCtx) {
     audioCtx = new AudioContext();
@@ -187,3 +128,64 @@ function visualize(stream) {
     amplitudeCanvasCtx.stroke();
   }
 }
+
+function gotStream(stream) {
+  window.stream = stream; // make stream available to console
+  
+  rec = new MediaRecorder(stream);
+  visualize(stream);
+  rec.ondataavailable = e => {
+    audioChunks.push(e.data);
+    if (rec.state == "inactive"){
+      let blob = new Blob(audioChunks,{type:'audio/x-mpeg-3'});
+      recordedAudio.src = URL.createObjectURL(blob);
+      recordedAudio.controls=true;
+      recordedAudio.autoplay=true;
+      audioDownload.href = recordedAudio.src;
+      audioDownload.download = 'mp3';
+      audioDownload.innerHTML = 'download';
+    }
+  }
+}
+
+function handleError(error) {
+  console.log('navigator.MediaDevices.getUserMedia error: ', error.message, error.name);
+}
+
+function start() {
+  // Second call to getUserMedia() with changed device may cause error, so we need to release stream before changing device
+  if (window.stream) {
+    stream.getAudioTracks()[0].stop();
+  }
+
+  const audioSource = audioInputSelect.value;
+  
+  const constraints = {
+    audio: {deviceId: audioSource ? {exact: audioSource} : undefined}
+  };
+  
+  navigator.mediaDevices.getUserMedia(constraints).then(gotStream).catch(handleError);
+}
+
+audioInputSelect.onchange = start;
+  
+startRecord.onclick = e => {
+  startRecord.disabled = true;
+  stopRecord.disabled=false;
+  audioChunks = [];
+  rec.start();
+}
+stopRecord.onclick = e => {
+  startRecord.disabled = false;
+  stopRecord.disabled=true;
+  rec.stop();
+}
+
+navigator.mediaDevices.enumerateDevices()
+.then(gotDevices)
+.then(start)
+.catch(handleError);
+
+
+
+

@@ -65,10 +65,6 @@ function visualize(stream) {
   amplitudeCanvas.width  = amplitudeCanvas.offsetWidth;
   const amplitudeCanvasCtx = amplitudeCanvas.getContext('2d');
   
-  // frequencyCanvas.style.width = '100%';
-  // frequencyCanvas.width  = frequencyCanvas.offsetWidth;
-  // const frequencyCanvasCtx = frequencyCanvas.getContext('2d');
-
   const GRAPH_WINDOW_LENGTH = 120000;
   let graphWindowData = new Uint8Array(GRAPH_WINDOW_LENGTH);
   let graphWindowStart = 0;
@@ -94,8 +90,8 @@ function visualize(stream) {
     // drawFrequencyGraph();
     max_amplitude = Math.max.apply(Math, amplitudeData);
     document.getElementById('volume').addEventListener('change', function() {
-    max_amplification = this.value;
-});
+        max_amplification = this.value;
+    });
     auto_gain = max_amplification/max_amplitude;
     gainNode.gain.value = auto_gain;
 

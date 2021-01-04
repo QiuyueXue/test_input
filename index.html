@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width">
     <title>Home Stethoscope</title>
-    <link href="styles/app.css" rel="stylesheet" type="text/css">
+    <!-- <link href="styles/app.css" rel="stylesheet" type="text/css"> -->
   </head>
   <body>
       <div class="container">
@@ -20,20 +20,20 @@
         <canvas class="visualizer" height="300px"></canvas>
         <div class="col-3">
           <p>Adjust Amplification</p>
-          <input id="volume" type="range" min="1E-04" max="5E-03" step="1E-04" value="5E-04"/>
+          <input id="volume" type="range" min="1E-05" max="1E-02" step="1E-04" value="5E-04"/>
         </div>
         <p>
-			<button id=startRecord>start</button>
+			<button id=startRecord>record</button>
 			<button id=stopRecord disabled>stop</button>
 		</p>	
 		<p>
 			<audio id=recordedAudio></audio>
 			<a id=audioDownload></a>
 		</p>
-        <div id="buttons">
+        <!-- <div id="buttons">
           <button class="record">Record</button>
           <button class="stop">Stop</button>
-        </div>
+        </div> -->
       </section>
       <section class="sound-clips">
       </section>
@@ -41,7 +41,7 @@
     </div>
 
     <!-- <script src="scripts/processing.js"></script> -->
-    <script src="app.js"></script>
+    <script src="scripts/app.js"></script>
 
   </body>
 </html>

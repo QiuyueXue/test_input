@@ -6,6 +6,10 @@ const amplitudeCanvas = document.querySelector('.visualizer');
 const mainSection = document.querySelector('.main-controls');
 let audioCtx;
 const amplitudeCanvasCtx = amplitudeCanvas.getContext("2d");
+var rec_raw;
+var rec_filtered;
+var audio = new Audio('audio_file.mp3');
+
 
 
 const audioInputSelect = document.querySelector('select#audioSource');
@@ -69,6 +73,34 @@ function visualize(stream) {
   source.connect(iirfilter);
   iirfilter.connect(gainNode);
   gainNode.connect(analyser);
+
+  rec_raw = new WebAudioRecorder(source, {workerDir: "scripts/lib/", encoding: "wav", numChannels: 2});
+  rec_raw.onComplete = function(recorder, blob) {
+      createDownloadLink(blob,recorder.encoding, "raw")
+  }
+
+  rec_filtered = new WebAudioRecorder(gainNode, {workerDir: "scripts/lib/", encoding: "wav", numChannels: 2});
+  rec_filtered.onComplete = function(recorder, blob) {
+      createDownloadLink(blob,recorder.encoding, "filtered")
+  }
+
+  rec_raw.setOptions({
+      timeLimit:120,
+      bufferSize: 8192,
+      encodeAfterRecord:true,
+        ogg: {quality: 0.5},
+        mp3: {bitRate: 160}
+      });
+
+  rec_filtered.setOptions({
+      timeLimit:120,
+      bufferSize: 8192,
+      encodeAfterRecord:true,
+        ogg: {quality: 0.5},
+        mp3: {bitRate: 160}
+      });
+
+
   draw();
 
   function draw() {
@@ -123,20 +155,7 @@ function visualize(stream) {
 function gotStream(stream) {
   window.stream = stream; // make stream available to console
   
-  rec = new MediaRecorder(stream);
   visualize(stream);
-  rec.ondataavailable = e => {
-    audioChunks.push(e.data);
-    if (rec.state == "inactive"){
-      let blob = new Blob(audioChunks,{'type':'audio/ogg; codecs=opus'});
-      recordedAudio.src = URL.createObjectURL(blob);
-      recordedAudio.controls=true;
-      recordedAudio.autoplay=true;
-      audioDownload.href = recordedAudio.src;
-      audioDownload.download = 'myrecording.ogg';
-      audioDownload.innerHTML = 'download';
-    }
-  }
 }
 
 function handleError(error) {
@@ -158,18 +177,47 @@ function start() {
   navigator.mediaDevices.getUserMedia(constraints).then(gotStream).catch(handleError);
 }
 
-audioInputSelect.onchange = start;
+function createDownloadLink(blob,encoding,raw_or_filtered) {
   
+  var url = URL.createObjectURL(blob);
+  var au = document.createElement('audio');
+  var li = document.createElement('li');
+  var link = document.createElement('a');
+  au.controls = true;
+  au.src = url;
+  link.href = url;
+  link.download = new Date().toISOString() + '_' + raw_or_filtered + '.'+encoding;
+  link.innerHTML = link.download;
+  li.appendChild(au);
+  li.appendChild(link);
+  recordingsList.appendChild(li);
+}
+
+
+
+audioInputSelect.onchange = start;
+startCalibrate.onclick = e => {
+  startCalibrate.disabled = true;
+  stopCalibrate.disabled = false;
+  audio.play();
+} 
+stopCalibrate.onclick = e => {
+  startCalibrate.disabled = false;
+  stopCalibrate.disabled = true;
+  audio.pause();
+}  
 startRecord.onclick = e => {
   startRecord.disabled = true;
   stopRecord.disabled=false;
   audioChunks = [];
-  rec.start();
+  rec_raw.startRecording();
+  rec_filtered.startRecording();
 }
 stopRecord.onclick = e => {
   startRecord.disabled = false;
   stopRecord.disabled=true;
-  rec.stop();
+  rec_raw.finishRecording();
+  rec_filtered.finishRecording();
 }
 
 navigator.mediaDevices.enumerateDevices()

@@ -8,7 +8,7 @@ let audioCtx;
 const amplitudeCanvasCtx = amplitudeCanvas.getContext("2d");
 var rec_raw;
 var rec_filtered;
-var audio = new Audio('../chirp.mp3');
+var audio = new Audio('chirp.mp3');
 
 
 

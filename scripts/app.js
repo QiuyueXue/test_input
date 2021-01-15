@@ -13,10 +13,11 @@ var audio = new Audio('chirp.mp3');
 
 
 const audioInputSelect = document.querySelector('select#audioSource');
-const selectors = [audioInputSelect];
+const audioOutputSelect = document.querySelector('select#audioOutput');
+const selectors = [audioInputSelect, audioOutputSelect];
+
 
 function gotDevices(deviceInfos) {
-  // Handles being called several times to update labels. Preserve values.
   const values = selectors.map(select => select.value);
   selectors.forEach(select => {
     while (select.firstChild) {
@@ -30,7 +31,10 @@ function gotDevices(deviceInfos) {
     if (deviceInfo.kind === 'audioinput') {
       option.text = deviceInfo.label || `microphone ${audioInputSelect.length + 1}`;
       audioInputSelect.appendChild(option);
-    }
+    }else if (deviceInfo.kind === 'audiooutput') {
+      option.text = deviceInfo.label || `speaker ${audioOutputSelect.length + 1}`;
+      audioOutputSelect.appendChild(option);
+    } 
   }
   selectors.forEach((select, selectorIndex) => {
     if (Array.prototype.slice.call(select.childNodes).some(n => n.value === values[selectorIndex])) {

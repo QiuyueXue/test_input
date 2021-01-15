@@ -200,11 +200,13 @@ startCalibrate.onclick = e => {
   startCalibrate.disabled = true;
   stopCalibrate.disabled = false;
   audio.play();
+  rec_raw.startRecording();
 } 
 stopCalibrate.onclick = e => {
   startCalibrate.disabled = false;
   stopCalibrate.disabled = true;
   audio.pause();
+  rec_raw.finishRecording();
 }  
 startRecord.onclick = e => {
   startRecord.disabled = true;

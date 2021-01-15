@@ -32,12 +32,7 @@ function gotDevices(deviceInfos) {
     if (deviceInfo.kind === 'audioinput') {
       option.text = deviceInfo.label || `microphone ${audioInputSelect.length + 1}`;
       audioInputSelect.appendChild(option);
-    // } else if (deviceInfo.kind === 'audiooutput') {
-    //   option.text = deviceInfo.label || `speaker ${audioOutputSelect.length + 1}`;
-    //   audioOutputSelect.appendChild(option);
-    // } else {
-    //   console.log('Some other kind of source/device: ', deviceInfo);
-    // }
+     }     
   }
   selectors.forEach((select, selectorIndex) => {
     if (Array.prototype.slice.call(select.childNodes).some(n => n.value === values[selectorIndex])) {

@@ -13,9 +13,9 @@ var audio = new Audio('chirp.mp3');
 
 
 const audioInputSelect = document.querySelector('select#audioSource');
-const audioOutputSelect = document.querySelector('select#audioOutput');
-const selectors = [audioInputSelect, audioOutputSelect];
-audioOutputSelect.disabled = !('sinkId' in HTMLMediaElement.prototype);
+// const audioOutputSelect = document.querySelector('select#audioOutput');
+const selectors = [audioInputSelect];
+// audioOutputSelect.disabled = !('sinkId' in HTMLMediaElement.prototype);
 
 function gotDevices(deviceInfos) {
   // Handles being called several times to update labels. Preserve values.
@@ -32,12 +32,12 @@ function gotDevices(deviceInfos) {
     if (deviceInfo.kind === 'audioinput') {
       option.text = deviceInfo.label || `microphone ${audioInputSelect.length + 1}`;
       audioInputSelect.appendChild(option);
-    } else if (deviceInfo.kind === 'audiooutput') {
-      option.text = deviceInfo.label || `speaker ${audioOutputSelect.length + 1}`;
-      audioOutputSelect.appendChild(option);
-    } else {
-      console.log('Some other kind of source/device: ', deviceInfo);
-    }
+    // } else if (deviceInfo.kind === 'audiooutput') {
+    //   option.text = deviceInfo.label || `speaker ${audioOutputSelect.length + 1}`;
+    //   audioOutputSelect.appendChild(option);
+    // } else {
+    //   console.log('Some other kind of source/device: ', deviceInfo);
+    // }
   }
   selectors.forEach((select, selectorIndex) => {
     if (Array.prototype.slice.call(select.childNodes).some(n => n.value === values[selectorIndex])) {
@@ -239,6 +239,7 @@ stopCalibrate.onclick = e => {
   startCalibrate.disabled = false;
   stopCalibrate.disabled = true;
   audio.pause();
+  audio.currentTime = 0;
   rec_raw.finishRecording();
 }  
 startRecord.onclick = e => {
